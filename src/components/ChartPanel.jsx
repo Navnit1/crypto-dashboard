@@ -27,7 +27,7 @@ const RANGES = [
   { id: '365', label: '1Y' },
 ];
 
-const PALETTE = ['#3FC5FF', '#FF6B7A', '#FFB454', '#2DD9A8', '#7C5CFF', '#F472B6'];
+const PALETTE = ['#3FC5FF', '#fd293e', '#FFB454', '#2DD9A8', '#7C5CFF', '#F472B6'];
 
 function downsample(points, maxPoints) {
   if (points.length <= maxPoints) return points;
@@ -148,11 +148,12 @@ export default function ChartPanel() {
       </div>
 
       <div className="h-72 lg:h-80 relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="w-2 h-2 rounded-full bg-signal-accent2 pulse-dot" />
-          </div>
-        )}
+       {loading && (
+  <div className="absolute inset-0 flex items-center justify-center gap-2">
+    <span className="w-2 h-2 rounded-full bg-signal-accent2 pulse-dot" />
+    <span className="text-xs font-mono text-base-400">Loading chart data...</span>
+  </div>
+)}
         {!selectedCoins.length && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-base-400">
             Select a cryptocurrency to plot its price.
