@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const client = axios.create({
- baseURL: '/api/coingecko',
+ baseURL: 'https://api.allorigins.win/raw?url=https://api.coingecko.com/api/v3',
   timeout: 15000,
 });
 
