@@ -24,27 +24,46 @@ export const getMarkets = (vsCurrency = 'usd', perPage = 50, page = 1) =>
       total_volume: coin.quotes?.USD?.volume_24h ?? 0,
     }))
   );
- 
+ const COINPAPRIKA_ID_MAP = {
+  bitcoin: 'btc-bitcoin',
+  ethereum: 'eth-ethereum',
+  tether: 'usdt-tether',
+};
+
+const normalizeCoinId = (coinId) => {
+  return COINPAPRIKA_ID_MAP[coinId] || coinId;
+};
 // Historical market chart for a single coin (price series).
 // Returns { prices: [[timestamp_ms, price], ...] } to match the old CoinGecko shape.
 export const getMarketChart = (coinId, vsCurrency = 'usd', days = 7) => {
-  const end = new Date();
+  const numDays = Number(days);
+
   const start = new Date();
-  start.setDate(end.getDate() - Number(days));
- 
+
+  if (numDays <= 1) {
+    // CoinPaprika free tier only allows 1 day of hourly history.
+    // Using today's date prevents requesting >24 hours of hourly data.
+    start.setHours(0, 0, 0, 0);
+  } else {
+    start.setDate(start.getDate() - numDays);
+  }
+
+  const interval = numDays <= 1 ? '1h' : '1d';
+
   return client
     .get(`/tickers/${coinId}/historical`, {
       params: {
-        start: start.toISOString().split('T')[0],
-        end: end.toISOString().split('T')[0],
-        interval: days <= 1 ? '1h' : '1d',
+        start: start.toISOString().slice(0, 10),
+        interval,
       },
     })
     .then((res) => ({
-      prices: res.data.map((point) => [new Date(point.timestamp).getTime(), point.price]),
+      prices: (res.data || []).map((point) => [
+        new Date(point.timestamp).getTime(),
+        Number(point.price),
+      ]),
     }));
 };
- 
 // Simple price lookup, used for the exchange converter.
 // Returns { [coinId]: { usd: price } } to match the old shape.
 export const getSimplePrice = (ids = [], vsCurrencies = ['usd']) =>
